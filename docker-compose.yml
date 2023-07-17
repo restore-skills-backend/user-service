@@ -1,0 +1,44 @@
+version: "3.9"
+services:
+  
+  postgres:
+    container_name: restore-db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+      PGDATA: /data/postgres
+    volumes:
+       - postgres-db:/data/postgres
+    ports:
+      - "5444:5432"
+
+  keycloak:
+      container_name: restore-iam
+      image: quay.io/keycloak/keycloak:21.1.1
+      command: -Dkeycloak.profile.feature.admin_fine_grained_authz=enabled -Dkeycloak.profile.feature.token_exchange=enabled start-dev 
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: restore-db
+        DB_DATABASE: postgres
+        DB_USER: postgres
+        DB_SCHEMA: public
+        DB_PASSWORD: postgres
+        KEYCLOAK_ADMIN: admin
+        KEYCLOAK_ADMIN_PASSWORD: Restore@2023
+        KEYCLOAK_LOGLEVEL: ALL
+        KC_LOGL_EVEL: ALL
+        ROOT_LOGLEVEL: ALL
+        # Uncomment the line below if you want to specify JDBC parameters. The parameter below is just an example, and it shouldn't be used in production without knowledge. It is highly recommended that you read the PostgreSQL JDBC driver documentation in order to use it.
+        #JDBC_PARAMS: "ssl=true"
+      ports:
+        - 8090:8080
+
+
+#Todo: to specify network for dependent services.
+volumes:
+  postgres-db:
+    driver: local
+
+
